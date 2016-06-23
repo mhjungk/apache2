@@ -1,0 +1,122 @@
+diff -ruN a/acinclude.m4 b/acinclude.m4
+--- a/acinclude.m4	2016-02-11 12:02:29.000000000 -0700
++++ b/acinclude.m4	2016-06-23 02:53:31.219020664 -0600
+@@ -54,6 +54,8 @@
+   APACHE_SUBST(CXX)
+   APACHE_SUBST(CPPFLAGS)
+   APACHE_SUBST(CFLAGS)
++  APACHE_SUBST(CC_FOR_BUILD)
++  APACHE_SUBST(CFLAGS_FOR_BUILD)
+   APACHE_SUBST(CXXFLAGS)
+   APACHE_SUBST(LTFLAGS)
+   APACHE_SUBST(LDFLAGS)
+diff -ruN a/configure b/configure
+--- a/configure	2016-04-04 10:11:48.000000000 -0600
++++ b/configure	2016-06-23 03:22:36.746734387 -0600
+@@ -866,6 +866,7 @@
+ LDFLAGS
+ CFLAGS
+ CC
++CC_FOR_BUILD
+ target_os
+ target_vendor
+ target_cpu
+@@ -1602,6 +1603,13 @@
+     cross_compiling=maybe
+   elif test "x$build_alias" != "x$host_alias"; then
+     cross_compiling=yes
++    if test "x${CC_FOR_BUILD}" = "x"; then
++      if test "x${HOST_CC}" = "x"; then
++        CC_FOR_BUILD=cc
++      else
++        CC_FOR_BUILD=${HOST_CC}
++      fi
++    fi
+   fi
+ fi
+ 
+@@ -34234,6 +34242,10 @@
+ 
+ 
+ 
++  APACHE_VAR_SUBST="$APACHE_VAR_SUBST CC_FOR_BUILD"
++
++
++
+   APACHE_VAR_SUBST="$APACHE_VAR_SUBST CPP"
+ 
+ 
+diff -ruN a/server/Makefile.in b/server/Makefile.in
+--- a/server/Makefile.in	2013-10-02 06:20:14.000000000 -0600
++++ b/server/Makefile.in	2016-06-23 03:14:30.662257418 -0600
+@@ -23,9 +23,14 @@
+ include $(top_builddir)/build/rules.mk
+ include $(top_srcdir)/build/library.mk
+ 
++ifdef CC_FOR_BUILD
++gen_test_char: gen_test_char.c
++	$(CC_FOR_BUILD) -DCROSS_COMPILE -o $@ $<
++else
+ gen_test_char_OBJECTS = gen_test_char.lo
+ gen_test_char: $(gen_test_char_OBJECTS)
+ 	$(LINK) $(EXTRA_LDFLAGS) $(gen_test_char_OBJECTS) $(EXTRA_LIBS)
++endif
+ 
+ test_char.h: gen_test_char
+ 	./gen_test_char > test_char.h
+diff -ruN a/srclib/apr/configure b/srclib/apr/configure
+--- a/srclib/apr/configure	2015-04-25 06:04:18.000000000 -0600
++++ b/srclib/apr/configure	2016-06-23 03:15:07.702789389 -0600
+@@ -840,6 +840,7 @@
+ LDFLAGS
+ CFLAGS
+ CC
++CC_FOR_BUILD
+ APR_MAJOR_VERSION
+ APR_DOTTED_VERSION
+ apr_builders
+@@ -1395,6 +1396,13 @@
+     cross_compiling=maybe
+   elif test "x$build_alias" != "x$host_alias"; then
+     cross_compiling=yes
++    if test "x${CC_FOR_BUILD}" = "x"; then
++      if test "x${HOST_CC}" = "x"; then
++        CC_FOR_BUILD=cc
++      else
++        CC_FOR_BUILD=${HOST_CC}
++      fi
++    fi
+   fi
+ fi
+ 
+diff -ruN a/srclib/apr/Makefile.in b/srclib/apr/Makefile.in
+--- a/srclib/apr/Makefile.in	2014-04-25 04:51:11.000000000 -0600
++++ b/srclib/apr/Makefile.in	2016-06-23 02:46:24.700378319 -0600
+@@ -8,6 +8,7 @@
+ # APR (Apache Portable Runtime) library Makefile.
+ #
+ CPP = @CPP@
++CC_FOR_BUILD = @CC_FOR_BUILD@
+ 
+ # get substituted into some targets
+ APR_MAJOR_VERSION=@APR_MAJOR_VERSION@
+@@ -129,13 +130,19 @@
+ etags:
+ 	etags `find . -name '*.[ch]'`
+ 
++ifdef CC_FOR_BUILD
++tools/gen_test_char@EXEEXT@: tools/gen_test_char.c
++	$(CC_FOR_BUILD) -DCROSS_COMPILE -o $@ $<
++else
+ OBJECTS_gen_test_char = tools/gen_test_char.lo $(LOCAL_LIBS)
+ tools/gen_test_char.lo: tools/gen_test_char.c
+ 	$(APR_MKDIR) tools
++	@echo cross_compiling is $(cross_compiling)
+ 	$(LT_COMPILE)
+ 
+ tools/gen_test_char@EXEEXT@: $(OBJECTS_gen_test_char)
+ 	$(LINK_PROG) $(OBJECTS_gen_test_char) $(ALL_LIBS)
++endif
+ 
+ include/private/apr_escape_test_char.h: tools/gen_test_char@EXEEXT@
+ 	$(APR_MKDIR) include/private

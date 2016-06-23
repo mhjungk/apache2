@@ -12,7 +12,7 @@ Maintainer
 Patches
 =======
 
-Apache httpd and APR have a bug when cross compiling[here](https://bz.apache.org/bugzilla/show_bug.cgi?id=51257). This patch avoids compiling 'gen_test_char' with rumprun compiler.
+Apache httpd and APR have a bug when cross compiling [here](https://bz.apache.org/bugzilla/show_bug.cgi?id=51257). This patch avoids compiling 'gen_test_char' with rumprun compiler.
 
 Instructions
 ============

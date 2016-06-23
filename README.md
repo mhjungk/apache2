@@ -41,7 +41,6 @@ To run a Apache httpd server on qemu, first establish a tap device.
 sudo ip tuntap add tap0 mode tap
 sudo ip addr add 10.0.120.100/24 dev tap0
 sudo ip link set dev tap0 up
-
 ````
 
 And, run next command to start Apache http server on rump kernel.

@@ -12,12 +12,12 @@ Maintainer
 Patches
 =======
 
-Apache httpd and APR have a bug when cross compiling [here](https://bz.apache.org/bugzilla/show_bug.cgi?id=51257). This patch avoids compiling 'gen_test_char' with rumprun compiler.
+Apache httpd and APR have a bug when cross compiling [here](https://bz.apache.org/bugzilla/show_bug.cgi?id=51257). This patch avoids compiling `gen_test_char` with rumprun compiler.
 
 Instructions
 ============
 
-'Makefile' will download sources as tar, extract, apply atches, and build them.
+`Makefile` will download sources as tar, extract, apply atches, and build them.
 ```
 make
 ```
@@ -59,9 +59,9 @@ Should change the IP address to your one.
 Known issues
 ============
 
-'mod_unique_id' is disabled by default because 'apr_sockaddr_info_get()' in 'modules/metadata/mod_unique_id.c' returns error. It seems like address cannot be found by hostname 'rumprun'.
+`mod_unique_id` is disabled by default because `apr_sockaddr_info_get()` in `modules/metadata/mod_unique_id.c` returns error. It seems like address cannot be found by hostname `rumprun`.
 
-Also, 'mod_auth_digest' cannot be used because of page fault error caused by 'mmap'.
+Also, `mod_auth_digest` cannot be used because of page fault error caused by `mmap`.
 
-Rumprun is halted when forking and finishing parent process. To prevent it, 'httpd' should run with '-DONE_PROCESS' option.
+Rumprun is halted when forking and finishing parent process. To prevent it, `httpd` should run with `-DONE_PROCESS` option.
 

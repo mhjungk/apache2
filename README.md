@@ -12,20 +12,21 @@ Maintainer
 Patches
 =======
 
-Apache httpd and APR have a bug when cross compiling [here](https://bz.apache.org/bugzilla/show_bug.cgi?id=51257). This patch avoids compiling `gen_test_char` with rumprun compiler.
+Apache httpd and APR have a bug when cross compiling [here](https://bz.apache.org/bugzilla/show_bug.cgi?id=51257). This patch avoids compiling `gen_test_char` with not rumprun but host compiler.
 
 Instructions
 ============
 
-`Makefile` will download sources as tar, extract, apply atches, and build them.
+`Makefile` will automatically download sources as tar, extract, apply patches, and build them.
+
 ```
 make
 ```
 
-Basically, Dynamic Shared Object(DSO) is not set because Rumprun doesn't support shared memory.
-
+Basically, Dynamic Shared Object(DSO) is disabled because Rumprun doesn't support shared library.
 
 And bake the image like below:
+
 ```
 rumprun-bake hw_virtio bin/httpd.bin bin/httpd
 ```
@@ -35,7 +36,7 @@ Replace the platfrom with yours.
 Examples
 ========
 
-To run a Apache httpd server on qemu, first establish a tap device.
+To run a Apache httpd server on qemu, first add a tap device on network.
 
 ````
 sudo ip tuntap add tap0 mode tap
@@ -43,7 +44,7 @@ sudo ip addr add 10.0.120.100/24 dev tap0
 sudo ip link set dev tap0 up
 ````
 
-And, run next command to start Apache http server on rump kernel.
+And, run the next command to start Apache http daemon on rump kernel.
 
 ````
 rumprun qemu -i -M 512 \
@@ -60,7 +61,6 @@ Known issues
 
 `mod_unique_id` is disabled by default because `apr_sockaddr_info_get()` in `modules/metadata/mod_unique_id.c` returns error. It seems like address cannot be found by hostname `rumprun`.
 
-Also, `mod_auth_digest` cannot be used because of page fault error caused by `mmap`.
+Also, `mod_auth_digest` cannot be used for now because of page fault error caused by `mmap` system call.
 
-Rumprun is halted when forking and finishing parent process. To prevent it, `httpd` should run with `-DONE_PROCESS` option.
-
+`-DONE_PROCESS` option should be set when starting. Otherwise, rumprun is halted after forking and finishing parent process.

@@ -7,7 +7,7 @@ Maintainer
 ----------
 
 * Myungho Jung, mhjungk@gmail.com
-* Github: @mhjungk
+* Github: @myunghoj
 
 Patches
 =======
